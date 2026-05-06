@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./server
+    container_name: konecto_backend
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./server/.env
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./client
+    container_name: konecto_frontend
+    ports:
+      - "3000:80"  
+    volumes:
+      - ./client/src:/usr/share/nginx/html 

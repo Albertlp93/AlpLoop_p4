@@ -1,0 +1,70 @@
+<<<<< REGISTRO DE USUARIOS >>>>>
+
+mutation {
+  registrarUsuario(
+    nombre: "Alberto Prueba",
+    email: "test@konecto.com",
+    password: "password123"
+  ) {
+    id
+    nombre
+    email
+  }
+}
+
+
+<<<<< LOGIN DE USUARIOS >>>>>
+
+query {
+  loginUsuario(
+    email: "test@konecto.com",
+    password: "password123"
+  ) {
+    id
+    nombre
+    email
+  }
+}
+
+
+<<<<< CREAR VOLUNTARIADO >>>>>
+
+mutation {
+  crearVoluntariado(
+    titulo: "Acompañamiento Personas Mayores",
+    tipo: "OFERTA",
+    descripcion: "Se busca voluntario para paseo matutino",
+    jornada: "Mañanas",
+    sueldo: 0,
+    email: "contacto@ong.org"
+  ) {
+    id
+    titulo
+    tipo
+  }
+}
+
+<<<<< OBTENER VOLUNTARIADOS >>>>>
+query {
+  obtenerVoluntariados {
+    id
+    titulo
+    tipo
+    descripcion
+    email
+  }
+}
+
+<<<<< ELIMINACION DE VALOR BASADO EN ID >>>>>
+
+mutation {
+  eliminarVoluntariado(id: "AQUÍ_PEGA_EL_ID_DE_MONGO")
+}
+
+mutation {
+  eliminarTodosVoluntariados
+}
+
+mutation {
+  eliminarTodosUsuarios
+}

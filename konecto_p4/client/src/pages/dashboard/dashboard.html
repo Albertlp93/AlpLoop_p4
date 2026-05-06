@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Konecto - Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <nav>
+        <h2>Panel Konecto</h2>
+        <div id="status">Rol: <span id="userRole">Cargando...</span></div>
+        <button onclick="cerrarSesion()">Salir</button>
+    </nav>
+
+    <div id="adminPanel" style="display:none;">
+        <h3>Herramientas de Administrador</h3>
+        <button onclick="limpiarBaseDatos()">Vaciar Voluntariados</button>
+    </div>
+
+    <div id="voluntariadosContainer">
+        </div>
+
+    <script src="../../js/almacenaje.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
