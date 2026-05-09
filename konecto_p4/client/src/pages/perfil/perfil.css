@@ -1,0 +1,103 @@
+.perfil-container {
+    max-width: 800px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
+.perfil-card {
+    background: white;
+    border-radius: 35px;
+    padding: 50px;
+    box-shadow: var(--shadow-card);
+    text-align: center;
+}
+
+.perfil-header {
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.avatar-circle {
+    width: 100px;
+    height: 100px;
+    background: var(--rosa-fosfo);
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 900;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    box-shadow: 0 10px 20px var(--rosa-glow);
+}
+
+.badge-role {
+    background: var(--gris-fondo);
+    color: var(--rosa-fosfo);
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    text-align: left;
+}
+
+.perfil-form input {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid var(--borde-suave);
+    border-radius: 15px;
+    font-size: 1rem;
+    transition: 0.3s;
+}
+
+.perfil-form input:disabled {
+    background: #fdfdfd;
+    color: #888;
+    border-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+.perfil-form input:focus:not(:disabled) {
+    border-color: var(--rosa-fosfo);
+    outline: none;
+}
+
+.perfil-actions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.btn-secondary {
+    background: var(--texto-oscuro);
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid #ccc;
+    padding: 14px 30px;
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+}

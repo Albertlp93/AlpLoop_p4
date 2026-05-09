@@ -8,7 +8,7 @@ const typeDefs = gql`
     id: ID!
     nombre: String!
     email: String!
-    role: String! # USER o ADMIN
+    role: String!
   }
 
   """
@@ -19,25 +19,23 @@ const typeDefs = gql`
     titulo: String!
     tipo: String!
     descripcion: String
-    jornada: String
-    sueldo: Int
     email: String
     fechaCreacion: String
   }
 
   type Query {
-    "Login que retorna el perfil completo incluyendo el rol"
+    "Login que retorna el perfil completo (Se define como Query para el frontend)"
     loginUsuario(email: String!, password: String!): Usuario
     
     "Lista todos los voluntariados registrados"
     obtenerVoluntariados: [Voluntariado]
     
-    "Consulta de usuarios (Solo accesible para ADMIN en la lógica)"
-    obtenerUsuarios: [Usuario]
+    "Consulta de perfil: datos de un usuario específico por su ID"
+    obtenerUsuarioPorId(id: ID!): Usuario
   }
 
   type Mutation {
-    "Registro de usuario permitiendo asignar rol (opcional)"
+    "Registro de usuario"
     registrarUsuario(
       nombre: String!, 
       email: String!, 
@@ -45,22 +43,28 @@ const typeDefs = gql`
       role: String
     ): Usuario
 
-    "Crea un voluntariado y dispara una notificación por WebSocket"
+    "Actualiza los datos del perfil (nombre, email y/o password)"
+    actualizarUsuario(
+      id: ID!, 
+      nombre: String, 
+      email: String, 
+      password: String
+    ): Usuario
+
+    "Crea un voluntariado"
     crearVoluntariado(
       titulo: String!, 
       tipo: String!, 
       descripcion: String, 
-      jornada: String, 
-      sueldo: Int, 
       email: String!
     ): Voluntariado
 
-    "Limpia la colección completa (Uso para el administrador)"
+    "Limpia la base de datos (Utilidades de prueba)"
     eliminarTodosVoluntariados: String
+    eliminarTodosUsuarios: String
   }
 
   type Subscription {
-    "Evento que se dispara automáticamente cuando se publica un nuevo voluntariado"
     voluntariadoCreado: Voluntariado
   }
 `;

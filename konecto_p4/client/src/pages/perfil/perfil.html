@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Konecto</title>
+    <link rel="stylesheet" href="../../assets/css/variables.css">
+    <link rel="stylesheet" href="../dashboard/dashboard.css"> <link rel="stylesheet" href="perfil.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo">Konecto<span>.</span></div>
+            <ul class="nav-links" id="nav-menu">
+                <li><a href="../dashboard/dashboard.html">Dashboard</a></li>
+                <li><a href="../publicaciones/publicaciones.html">Ofertas y Demandas</a></li>
+                <li><a href="perfil.html" class="active">Mi Perfil</a></li>
+            </ul>
+        </div>
+        <div class="user-pill">
+            <span id="user-display" class="user-name">Usuario</span>
+            <button id="logoutBtn" class="btn-logout">Salir</button>
+        </div>
+    </nav>
+
+    <main class="perfil-container">
+        <div class="perfil-card">
+            <div class="perfil-header">
+                <div class="avatar-circle" id="avatar-initials">U</div>
+                <h2 id="perfil-nombre-titulo">Cargando...</h2>
+                <span class="badge-role" id="perfil-rol">ROL</span>
+            </div>
+
+            <form id="perfilForm" class="perfil-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" id="edit-nombre" disabled required>
+                    </div>
+                    <div class="form-group">
+                        <label>Correo Electrónico</label>
+                        <input type="email" id="edit-email" disabled required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nueva Contraseña</label>
+                        <input type="password" id="edit-password" placeholder="••••••••" disabled>
+                        <small>Dejar en blanco para mantener la actual</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar Contraseña</label>
+                        <input type="password" id="edit-password-confirm" placeholder="••••••••" disabled>
+                    </div>
+                </div>
+
+                <div class="perfil-actions">
+                    <button type="button" id="btn-edit" class="btn-secondary">Editar Datos</button>
+                    <button type="submit" id="btn-save" class="btn-primary" style="display: none;">Guardar Cambios</button>
+                    <button type="button" id="btn-cancel" class="btn-outline" style="display: none;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="perfil.js"></script>
+</body>
+</html>

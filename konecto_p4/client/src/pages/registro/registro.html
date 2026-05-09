@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Konecto</title>
+    <link rel="stylesheet" href="../../assets/css/variables.css">
+    <link rel="stylesheet" href="../login/login.css"> </head>
+<body>
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Crear Cuenta</h2>
+            <p>Únete a la red de solidaridad</p>
+        </div>
+        
+        <form id="registroForm">
+            <div class="form-group">
+                <label>Nombre Completo</label>
+                <input type="text" id="nombre" placeholder="Ej: Maria García" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="tu@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" placeholder="Mínimo 6 caracteres" required>
+            </div>
+            <button type="submit" class="btn-primary">Registrarme</button>
+        </form>
+        
+        <div class="auth-footer">
+            <p>¿Ya tienes cuenta? <a href="../login/login.html">Inicia sesión</a></p>
+        </div>
+    </div>
+    <script src="registro.js"></script>
+</body>
+</html>

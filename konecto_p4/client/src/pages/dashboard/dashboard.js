@@ -1,131 +1,90 @@
-/**
- * @file dashboard.js
- * @description Lógica del panel de control con soporte para tiempo real (WebSockets).
- */
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. CONTROL DE SESIÓN
+    const nombre = localStorage.getItem('userName');
+    const rol = localStorage.getItem('userRole');
 
-window.onload = async () => {
-    // 1. Control de acceso (Roles y Sesión)
-    const role = sessionStorage.getItem('role');
-    const nombre = sessionStorage.getItem('nombre');
-
-    if (!role) {
+    if (!nombre) {
+        // Si no hay datos, fuera al login
         window.location.href = '../login/login.html';
         return;
     }
 
-    // Mostrar info de usuario y rol
-    document.getElementById('userRole').innerText = role;
-    
-    // 2. Lógica de Administrador
-    if (role === 'ADMIN') {
-        const adminPanel = document.getElementById('adminPanel');
-        if(adminPanel) adminPanel.style.display = 'block';
+    // 2. ACTUALIZAR TEXTOS
+    document.getElementById('user-display').textContent = nombre;
+    document.getElementById('welcome-name').textContent = nombre;
+    document.getElementById('role-badge').textContent = rol;
+    document.getElementById('user-role-display').textContent = rol;
+
+    // 3. MENU DINÁMICO PARA ADMIN
+    const navMenu = document.getElementById('nav-menu');
+    if (rol === 'ADMIN') {
+        const adminLi = document.createElement('li');
+        adminLi.innerHTML = `<a href="../admin/admin.html" class="nav-admin">🛡️ Admin</a>`;
+        navMenu.appendChild(adminLi);
+        document.getElementById('welcome-text').textContent = "Modo Administrador: Control total de la plataforma activado.";
     }
 
-    // 3. Carga inicial de datos (Asíncrona)
-    await renderizarVoluntariados();
+    // 4. CARGAR DATOS REALES (GraphQL)
+    fetchData();
 
-    // 4. Configuración de Tiempo Real (WebSockets)
-    conectarWebSocket();
-};
-
-/**
- * Obtiene y dibuja los voluntariados en el DOM
- */
-async function renderizarVoluntariados() {
-    const lista = await obtenerListaVoluntariados();
-    const container = document.getElementById('voluntariadosContainer');
-    
-    if (lista.length === 0) {
-        container.innerHTML = '<p>No hay voluntariados publicados todavía.</p>';
-        return;
-    }
-
-    container.innerHTML = lista.map(v => crearHTMLCarta(v)).join('');
-}
+    // 5. CERRAR SESIÓN
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.clear();
+        window.location.href = '../login/login.html';
+    });
+});
 
 /**
- * Genera el HTML de una carta de voluntariado
+ * Consulta a MongoDB vía GraphQL para traer los voluntariados
  */
-function crearHTMLCarta(v) {
-    return `
-        <div class="card" id="card-${v.id}" style="border-left: 5px solid ${v.tipo === 'OFERTA' ? '#2ecc71' : '#e67e22'}">
-            <h4>${v.titulo}</h4>
-            <span class="badge">${v.tipo}</span>
-            <p>${v.descripcion || 'Sin descripción'}</p>
-            <small>Contacto: ${v.email}</small>
-        </div>
-    `;
-}
-
-/**
- * Conexión WebSocket para recibir actualizaciones en tiempo real
- */
-function conectarWebSocket() {
-    // La URL del servidor GraphQL para suscripciones suele ser /graphql
-    const socket = new WebSocket('ws://localhost:4000/graphql', 'graphql-ws');
-
-    socket.onopen = () => {
-        // Mensaje de inicialización del protocolo GraphQL-WS
-        const initMsg = JSON.stringify({ type: 'connection_init', payload: {} });
-        socket.send(initMsg);
-
-        // Mensaje para suscribirse al evento 'voluntariadoCreado'
-        const subMsg = JSON.stringify({
-            id: '1',
-            type: 'start',
-            payload: {
-                query: `
-                    subscription {
-                        voluntariadoCreado {
-                            id
-                            titulo
-                            tipo
-                            descripcion
-                            email
-                        }
-                    }
-                `
+async function fetchData() {
+    const query = `
+        query {
+            obtenerVoluntariados {
+                titulo
+                tipo
+                descripcion
+                email
             }
-        });
-        socket.send(subMsg);
-    };
-
-    socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        
-        // Si recibimos un dato de la suscripción
-        if (data.type === 'data' && data.payload.data.voluntariadoCreado) {
-            const nuevoVol = data.payload.data.voluntariadoCreado;
-            const container = document.getElementById('voluntariadosContainer');
-            
-            // Insertar el nuevo voluntariado al principio de la lista con un efecto visual
-            const divTemporal = document.createElement('div');
-            divTemporal.innerHTML = crearHTMLCarta(nuevoVol);
-            const nuevaCarta = divTemporal.firstElementChild;
-            
-            nuevaCarta.style.backgroundColor = '#fff9c4'; // Color de resaltado temporal
-            container.prepend(nuevaCarta);
-            
-            console.log("¡Nuevo voluntariado recibido en tiempo real!");
         }
-    };
+    `;
 
-    socket.onerror = (error) => console.error("Error en WebSocket:", error);
-}
+    try {
+        const response = await fetch('http://localhost:4000/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+        });
 
-/**
- * Función para el botón del Administrador
- */
-async function ejecutarLimpieza() {
-    if (confirm("¿Estás seguro de que quieres borrar TODOS los voluntariados?")) {
-        const mensaje = await limpiarBaseDatos();
-        alert(mensaje);
-        location.reload(); // Recargamos para ver la lista vacía
+        const { data } = await response.json();
+        const container = document.getElementById('voluntariados-list');
+        const countText = document.getElementById('count-voluntariados');
+
+        if (data && data.obtenerVoluntariados) {
+            const items = data.obtenerVoluntariados;
+            countText.textContent = items.length;
+
+            if (items.length > 0) {
+                container.innerHTML = ''; // Limpiar mensaje de carga
+                
+                // Mostramos solo los 2 últimos en el Dashboard para no saturar
+                items.slice(0, 2).forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'vol-card';
+                    card.innerHTML = `
+                        <small style="color: var(--rosa-fosfo); font-weight: 800;">${item.tipo.toUpperCase()}</small>
+                        <h4 style="margin: 10px 0 5px 0; font-size: 1.2rem;">${item.titulo}</h4>
+                        <p style="font-size: 0.9rem; color: #555; line-height: 1.5;">${item.descripcion.substring(0, 100)}...</p>
+                        <div style="margin-top: 15px; font-size: 0.8rem; font-weight: 600;">📩 ${item.email}</div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                container.innerHTML = '<p>No hay actividad reciente para mostrar.</p>';
+            }
+        }
+    } catch (err) {
+        console.error("Error cargando el Dashboard:", err);
+        document.getElementById('voluntariados-list').innerHTML = '<p>Error de conexión con el servidor.</p>';
     }
-}
-
-function cerrarSesion() {
-    sessionStorage.clear();
-    window.location.href = '../login/login.html';
 }

@@ -2,25 +2,62 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Konecto - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Konecto</title>
+    <link rel="stylesheet" href="../../assets/css/variables.css">
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <nav>
-        <h2>Panel Konecto</h2>
-        <div id="status">Rol: <span id="userRole">Cargando...</span></div>
-        <button onclick="cerrarSesion()">Salir</button>
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo">Konecto<span>.</span></div>
+            <ul class="nav-links" id="nav-menu">
+                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="../publicaciones/publicaciones.html">Ofertas y Demandas</a></li>
+                <li><a href="../perfil/perfil.html">Mi Perfil</a></li>
+                </ul>
+        </div>
+        <div class="user-pill">
+            <div class="user-data">
+                <span id="user-display" class="user-name">Usuario</span>
+                <span id="role-badge" class="role-badge">Rol</span>
+            </div>
+            <button id="logoutBtn" class="btn-logout">Salir</button>
+        </div>
     </nav>
 
-    <div id="adminPanel" style="display:none;">
-        <h3>Herramientas de Administrador</h3>
-        <button onclick="limpiarBaseDatos()">Vaciar Voluntariados</button>
-    </div>
+    <main class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Bienvenido, <span id="welcome-name">...</span></h1>
+            <p id="welcome-text">Este es tu resumen de actividad en Konecto.</p>
+        </header>
 
-    <div id="voluntariadosContainer">
-        </div>
+        <section class="stats-grid">
+            <div class="stat-card">
+                <h3 id="count-voluntariados">0</h3>
+                <p>Publicaciones en el sistema</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="user-role-display">---</h3>
+                <p>Tu Rol actual</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="status-text">Activo</h3>
+                <p>Estado de conexión</p>
+            </div>
+        </section>
 
-    <script src="../../js/almacenaje.js"></script>
+        <section class="activity-section">
+            <div class="section-top">
+                <h2>Últimas Publicaciones</h2>
+                <button class="btn-primary" onclick="location.href='../publicaciones/publicaciones.html'">Gestionar todo</button>
+            </div>
+            <div id="voluntariados-list" class="activity-list">
+                <p class="loading">Sincronizando con MongoDB Atlas...</p>
+            </div>
+        </section>
+    </main>
+
     <script src="dashboard.js"></script>
 </body>
 </html>

@@ -26,6 +26,15 @@ query {
   }
 }
 
+query {
+  obtenerUsuarios {
+    id
+    nombre
+    email
+    role
+  }
+}
+
 
 <<<<< CREAR VOLUNTARIADO >>>>>
 

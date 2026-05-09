@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs');
 const { ApolloError, UserInputError } = require('apollo-server-express');
 const { PubSub } = require('graphql-subscriptions');
 
-// Inicializamos PubSub para manejar los WebSockets
 const pubsub = new PubSub();
 const VOLUNTARIADO_CREADO = 'VOLUNTARIADO_CREADO';
 
@@ -26,36 +25,48 @@ const resolvers = {
 
     obtenerVoluntariados: async () => {
       try {
-        // Mongoose devuelve los documentos más recientes primero
         return await Voluntariado.find().sort({ fechaCreacion: -1 });
       } catch (error) {
         throw new ApolloError("Error al obtener la lista");
       }
     },
 
-    obtenerUsuarios: async () => {
-      return await Usuario.find();
+    obtenerUsuarioPorId: async (_, { id }) => {
+      try {
+        const usuario = await Usuario.findById(id);
+        if (!usuario) throw new ApolloError("Usuario no encontrado");
+        return usuario;
+      } catch (error) {
+        throw new ApolloError("Error al buscar usuario: " + error.message);
+      }
     }
   },
 
   Mutation: {
     registrarUsuario: async (_, args) => {
       try {
-        const { email, password } = args;
+        const { email } = args;
         const existe = await Usuario.findOne({ email });
         if (existe) throw new UserInputError("El email ya está en uso");
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const nuevoUsuario = new Usuario({
-          ...args,
-          password: hashedPassword
-        });
-
+        // El modelo Usuario.js se encarga de la encriptación mediante pre('save')
+        const nuevoUsuario = new Usuario(args); 
         return await nuevoUsuario.save();
       } catch (error) {
         throw new ApolloError("Error en el registro: " + error.message);
+      }
+    },
+
+    actualizarUsuario: async (_, { id, ...datosActualizados }) => {
+      try {
+        const usuario = await Usuario.findById(id);
+        if (!usuario) throw new ApolloError("Usuario no encontrado");
+
+        // Aplicamos los cambios. Si hay 'password', el middleware de Mongoose la encriptará
+        Object.assign(usuario, datosActualizados);
+        return await usuario.save();
+      } catch (error) {
+        throw new ApolloError("Error al actualizar: " + error.message);
       }
     },
 
@@ -63,11 +74,7 @@ const resolvers = {
       try {
         const nuevoVol = new Voluntariado(args);
         const guardado = await nuevoVol.save();
-
-        // NOTIFICACIÓN EN TIEMPO REAL
-        // Emitimos el evento para que los clientes suscritos se actualicen
         pubsub.publish(VOLUNTARIADO_CREADO, { voluntariadoCreado: guardado });
-
         return guardado;
       } catch (error) {
         throw new UserInputError("Error de validación: " + error.message);
@@ -76,13 +83,17 @@ const resolvers = {
 
     eliminarTodosVoluntariados: async () => {
       const resultado = await Voluntariado.deleteMany({});
-      return `Éxito: Se han eliminado ${resultado.deletedCount} registros.`;
+      return `Éxito: Se han eliminado ${resultado.deletedCount} voluntariados.`;
+    },
+
+    eliminarTodosUsuarios: async () => {
+      const resultado = await Usuario.deleteMany({});
+      return `Éxito: Se han eliminado ${resultado.deletedCount} usuarios.`;
     }
   },
 
   Subscription: {
     voluntariadoCreado: {
-      // Los clientes se "enganchan" a este iterador para recibir datos
       subscribe: () => pubsub.asyncIterator([VOLUNTARIADO_CREADO]),
     },
   },

@@ -2,21 +2,35 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Konecto - Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Konecto</title>
+    <link rel="stylesheet" href="../../assets/css/variables.css">
     <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <div class="login-box">
-        <h1>Entrar a Konecto</h1>
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>¡Hola!</h2>
+            <p>Inicia sesión para continuar</p>
+        </div>
+        
         <form id="loginForm">
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="password" id="password" placeholder="Contraseña" required>
-            <button type="submit">Iniciar Sesión</button>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="tu@email.com" required>
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-primary">Entrar</button>
         </form>
-        <p id="errorMsg"></p>
+        
+        <div class="auth-footer">
+            <p>¿No tienes cuenta? <a href="../registro/registro.html">Abrir cuenta</a></p>
+            <a href="../../index.html" class="back-link">← Volver al inicio</a>
+        </div>
     </div>
-
-    <script src="../../js/almacenaje.js"></script>
     <script src="login.js"></script>
 </body>
 </html>
