@@ -4,20 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Konecto - Voluntariado Inteligente</title>
-    <link rel="stylesheet" href="assets/css/main.css"> <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
-        .hero { text-align: center; padding: 2rem; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; font-size: 3rem; }
-        p { color: #7f8c8d; font-size: 1.2rem; margin-bottom: 2rem; }
-        .btn-entrar { background-color: #3498db; color: white; padding: 1rem 2.5rem; text-decoration: none; border-radius: 50px; font-weight: bold; transition: background 0.3s; }
-        .btn-entrar:hover { background-color: #2980b9; }
-    </style>
+    <link rel="stylesheet" href="assets/css/index.css">
 </head>
 <body>
-    <div class="hero">
-        <h1>Bienvenido a Konecto</h1>
-        <p>La plataforma que conecta solidaridad con necesidades reales.</p>
-        <a href="pages/login/login.html" class="btn-entrar">Acceder a la Plataforma</a>
-    </div>
+
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Bienvenido a Konecto</h1>
+            <p>La plataforma que conecta solidaridad con necesidades reales.</p>
+            <a href="pages/login/login.html" class="btn-bienvenida">Acceder a la Plataforma</a>
+        </div>
+    </section>
+
+    <section class="info-section">
+        <div class="info-container">
+            
+            <div class="column">
+                <img src="jpg/inicio_busqueda_empleo.jpg" alt="Demanda de Empleo">
+                <div class="column-text">
+                    <h3>Busca Oportunidades</h3>
+                    <p>Encuentra proyectos que encajen con tu perfil. Publica tu demanda de voluntariado y permite que las organizaciones encuentren tu talento de forma directa.</p>
+                </div>
+            </div>
+
+            <div class="column">
+                <img src="jpg/inicio_oferta_empleo.jpg" alt="Oferta de Empleo">
+                <div class="column-text">
+                    <h3>Publica Ofertas</h3>
+                    <p>Si eres una entidad o empresa, gestiona tus vacantes de forma inteligente. Publica ofertas detalladas para atraer a los voluntarios más comprometidos.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
 </body>
 </html>
