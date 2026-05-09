@@ -101,3 +101,51 @@
 @media (max-width: 600px) {
     .form-grid { grid-template-columns: 1fr; }
 }
+/* --- AÑADIR AL FINAL DE TUS ARCHIVOS CSS --- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px; /* Altura fija para evitar saltos */
+}
+
+.user-pill {
+    display: flex;
+    align-items: center;
+    background: #ffffff !important;
+    padding: 5px 10px 5px 20px;
+    border-radius: 50px;
+    border: 1px solid #eee;
+    min-width: 200px;
+}
+
+.user-data {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    margin-right: 15px;
+}
+
+.user-name {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.1;
+}
+
+#role-badge {
+    font-size: 0.65rem;
+    color: #ff007f; /* Tu rosa corporativo */
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.btn-logout {
+    background: #2d3436;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+}

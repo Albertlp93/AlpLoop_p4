@@ -49,7 +49,6 @@ const resolvers = {
         const existe = await Usuario.findOne({ email });
         if (existe) throw new UserInputError("El email ya está en uso");
 
-        // El modelo Usuario.js se encarga de la encriptación mediante pre('save')
         const nuevoUsuario = new Usuario(args); 
         return await nuevoUsuario.save();
       } catch (error) {
@@ -62,7 +61,6 @@ const resolvers = {
         const usuario = await Usuario.findById(id);
         if (!usuario) throw new ApolloError("Usuario no encontrado");
 
-        // Aplicamos los cambios. Si hay 'password', el middleware de Mongoose la encriptará
         Object.assign(usuario, datosActualizados);
         return await usuario.save();
       } catch (error) {
@@ -78,6 +76,31 @@ const resolvers = {
         return guardado;
       } catch (error) {
         throw new UserInputError("Error de validación: " + error.message);
+      }
+    },
+
+    // --- NUEVAS MUTACIONES CORREGIDAS PARA MONGOOSE ---
+
+    actualizarVoluntariado: async (_, { id, ...datos }) => {
+      try {
+        const voluntariado = await Voluntariado.findByIdAndUpdate(
+          id, 
+          { $set: datos }, 
+          { new: true } // Para que devuelva el objeto ya actualizado
+        );
+        if (!voluntariado) throw new ApolloError("Publicación no encontrada");
+        return voluntariado;
+      } catch (error) {
+        throw new ApolloError("Error al actualizar voluntariado: " + error.message);
+      }
+    },
+
+    eliminarVoluntariado: async (_, { id }) => {
+      try {
+        const resultado = await Voluntariado.findByIdAndDelete(id);
+        return !!resultado; // Devuelve true si lo encontró y borró, false si no
+      } catch (error) {
+        throw new ApolloError("Error al eliminar: " + error.message);
       }
     },
 

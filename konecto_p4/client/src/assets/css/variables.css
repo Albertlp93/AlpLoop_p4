@@ -13,3 +13,65 @@
     --shadow-card: 0 20px 50px rgba(255, 0, 127, 0.15);
     --transition: all 0.3s ease;
 }
+
+/* --- HEADER UNIFICADO KONECTO --- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5%;
+    background: var(--blanco-puro);
+    height: 80px; /* Altura fija para que no salte */
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+}
+
+.user-pill {
+    display: flex !important;
+    align-items: center !important;
+    background: #ffffff !important;
+    padding: 5px 8px 5px 20px !important;
+    border-radius: 50px !important;
+    border: 1px solid var(--borde-suave) !important;
+    gap: 15px !important;
+    height: 50px !important; /* Altura de la píldora fija */
+}
+
+.user-data {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    justify-content: center;
+}
+
+.user-name {
+    font-weight: 800;
+    font-size: 0.9rem !important;
+    color: var(--texto-oscuro) !important;
+    line-height: 1;
+    margin: 0;
+}
+
+.role-badge {
+    font-size: 0.65rem !important;
+    color: var(--rosa-fosfo) !important;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.btn-logout {
+    background: var(--texto-oscuro) !important;
+    color: var(--blanco-puro) !important;
+    border: none !important;
+    padding: 8px 18px !important;
+    border-radius: 50px !important;
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-logout:hover {
+    background: var(--rosa-fosfo) !important;
+    transform: scale(1.05);
+}

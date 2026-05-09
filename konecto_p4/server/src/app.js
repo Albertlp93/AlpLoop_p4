@@ -1,10 +1,8 @@
 /**
  * @file app.js
- * @description Punto de entrada del servidor. Configuración de Express, Apollo y WebSockets.
+ * @description Punto de entrada del servidor. Configuración de Express, Apollo, GraphQL Subscriptions y Socket.io.
  */
 
-// 1. PARCHE DE SEGURIDAD (Debe ir en la línea 1)
-// Corrige el error "crypto is not defined" en entornos Docker/Node antiguos
 if (typeof global.crypto === 'undefined') {
     global.crypto = require('crypto');
 }
@@ -16,25 +14,39 @@ const { execute, subscribe } = require('graphql');
 const { SubscriptionServer } = require('subscriptions-transport-ws');
 const { makeExecutableSchema } = require('@graphql-tools/schema');
 const cors = require('cors');
+const { Server } = require("socket.io"); // <--- AÑADIDO: Importar Socket.io
 
-// Importaciones locales
 const conectarDB = require('./config/db');
 const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers');
 
 async function startServer() {
     const app = express();
-    app.use(cors()); // Permitir peticiones desde el frontend (puerto 3000)
+    app.use(cors());
 
-    // Conectar a MongoDB Atlas
     await conectarDB();
 
     const schema = makeExecutableSchema({ typeDefs, resolvers });
     const httpServer = createServer(app);
 
-    // Configuración del servidor Apollo
+    // --- CONFIGURACIÓN DE SOCKET.IO (Requerido por el Producto 4) ---
+    const io = new Server(httpServer, {
+        cors: { origin: "*" } // Permitir conexiones desde cualquier origen en pruebas
+    });
+
+    io.on('connection', (socket) => {
+        console.log('📡 Nuevo cliente conectado vía Socket.io');
+        
+        // Ejemplo de evento: cuando alguien publica, avisamos a todos
+        socket.on('nueva_publicacion', (data) => {
+            io.emit('actualizar_muro', data);
+        });
+    });
+
+    // Inyectamos io en el contexto de Apollo por si lo necesitas en los resolvers
     const server = new ApolloServer({
         schema,
+        context: ({ req }) => ({ req, io }), 
         plugins: [{
             async serverWillStart() {
                 return {
@@ -49,7 +61,6 @@ async function startServer() {
     await server.start();
     server.applyMiddleware({ app });
 
-    // Configuración de WebSockets para Suscripciones en tiempo real
     const subscriptionServer = SubscriptionServer.create(
         { schema, execute, subscribe },
         { server: httpServer, path: server.graphqlPath }
@@ -58,11 +69,11 @@ async function startServer() {
     const PORT = process.env.PORT || 4000;
     httpServer.listen(PORT, () => {
         console.log(`\n🚀 Servidor listo en http://localhost:${PORT}${server.graphqlPath}`);
-        console.log(`🚀 Suscripciones en ws://localhost:${PORT}${server.graphqlPath}\n`);
+        console.log(`📡 GraphQL WS en ws://localhost:${PORT}${server.graphqlPath}`);
+        console.log(`📡 Socket.io listo en el mismo puerto\n`);
     });
 }
 
-// Arrancar la aplicación
 startServer().catch(err => {
-    console.error('❌ Error fatal al arrancar el servidor:', err);
+    console.error('❌ Error fatal:', err);
 });

@@ -15,12 +15,14 @@ const typeDefs = gql`
   Tipo que representa una oferta o demanda de voluntariado.
   """
   type Voluntariado {
-    id: ID!
-    titulo: String!
-    tipo: String!
-    descripcion: String
-    email: String
-    fechaCreacion: String
+      id: ID!
+      titulo: String!
+      tipo: String!
+      descripcion: String
+      email: String
+      fechaCreacion: String
+      jornada: String
+      sueldo: Float
   }
 
   type Query {
@@ -53,15 +55,19 @@ const typeDefs = gql`
 
     "Crea un voluntariado"
     crearVoluntariado(
-      titulo: String!, 
-      tipo: String!, 
-      descripcion: String, 
-      email: String!
-    ): Voluntariado
+        titulo: String!, 
+        tipo: String!, 
+        descripcion: String, 
+        email: String!, 
+        jornada: String, 
+        sueldo: Float
+      ): Voluntariado
 
     "Limpia la base de datos (Utilidades de prueba)"
     eliminarTodosVoluntariados: String
     eliminarTodosUsuarios: String
+    actualizarVoluntariado(id: ID!, titulo: String, descripcion: String, jornada: String, sueldo: Float): Voluntariado
+    eliminarVoluntariado(id: ID!): Boolean
   }
 
   type Subscription {

@@ -1,127 +1,174 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const userId = localStorage.getItem('userId');
-    const nombreLocal = localStorage.getItem('userName');
-    const rolLocal = localStorage.getItem('userRole');
+/**
+ * @file perfil.js
+ * @description Gestión del perfil de usuario, validaciones y sincronización de sesión.
+ */
 
-    // 1. Verificación de sesión
-    if (!userId) {
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Recuperar datos de sesión (centralizado)
+    const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('userRole');
+    const userName = localStorage.getItem('userName');
+    const userEmail = localStorage.getItem('userEmail');
+
+    // 2. Verificación de Seguridad
+    if (!userId || !userEmail) {
+        localStorage.clear();
         window.location.href = '../login/login.html';
         return;
     }
 
-    // 2. Carga estética inicial
-    document.getElementById('user-display').textContent = nombreLocal;
-    document.getElementById('perfil-rol').textContent = rolLocal;
-    document.getElementById('avatar-initials').textContent = nombreLocal.charAt(0).toUpperCase();
+    // 3. Sincronizar Header (Navbar) y Elementos de la Tarjeta
+    // Aseguramos que los IDs coincidan con el estilo unificado de la Navbar
+    const userDisplay = document.getElementById('user-display');
+    const roleBadge = document.getElementById('role-badge');
+    
+    if (userDisplay) userDisplay.textContent = userName;
+    if (roleBadge) roleBadge.textContent = userRole;
 
-    // 3. Carga de datos reales desde el Servidor (Opción B)
-    await cargarDatosServidor(userId);
+    // Sincronizar datos específicos de la tarjeta de perfil
+    const perfilRol = document.getElementById('perfil-rol');
+    const avatarInitials = document.getElementById('avatar-initials');
+    
+    if (perfilRol) perfilRol.textContent = userRole;
+    if (avatarInitials) avatarInitials.textContent = userName.charAt(0).toUpperCase();
 
-    // --- LÓGICA DE INTERFAZ ---
+    // 4. Botón Salir Unificado
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.onclick = (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = '../login/login.html';
+        };
+    }
+
+    // 5. Cargar datos actuales del servidor
+    await cargarDatosPerfil(userId);
+
+    // 6. Lógica de Interfaz (Modo Edición / Cancelar)
     const btnEdit = document.getElementById('btn-edit');
     const btnSave = document.getElementById('btn-save');
     const btnCancel = document.getElementById('btn-cancel');
     const inputs = document.querySelectorAll('#perfilForm input');
 
-    // Activar modo edición
-    btnEdit.addEventListener('click', () => {
-        inputs.forEach(input => input.disabled = false);
-        btnEdit.style.display = 'none';
-        btnSave.style.display = 'inline-block';
-        btnCancel.style.display = 'inline-block';
-    });
+    if (btnEdit) {
+        btnEdit.onclick = () => {
+            // Habilitar inputs para edición
+            inputs.forEach(input => input.disabled = false);
+            btnEdit.style.display = 'none';
+            if (btnSave) btnSave.style.display = 'inline-block';
+            if (btnCancel) btnCancel.style.display = 'inline-block';
+        };
+    }
 
-    // Cancelar: Recarga la página para deshacer cambios visuales
-    btnCancel.addEventListener('click', () => location.reload());
+    if (btnCancel) {
+        btnCancel.onclick = () => {
+            location.reload(); // Revierte cambios visuales cargando de nuevo el estado guardado
+        };
+    }
 
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.clear();
-        window.location.href = '../login/login.html';
-    });
+    // 7. Guardar Cambios con Validaciones Blindadas
+    const perfilForm = document.getElementById('perfilForm');
+    if (perfilForm) {
+        perfilForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-    // 4. ENVÍO DEL FORMULARIO (Mutation Guardar)
-    document.getElementById('perfilForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
+            const nombre = document.getElementById('edit-nombre').value.trim();
+            const email = document.getElementById('edit-email').value.trim();
+            const pass = document.getElementById('edit-password').value;
+            const confirmPass = document.getElementById('edit-password-confirm').value;
 
-        const nombre = document.getElementById('edit-nombre').value;
-        const email = document.getElementById('edit-email').value;
-        const password = document.getElementById('edit-password').value;
-        const confirm = document.getElementById('edit-password-confirm').value;
+            // Validaciones de negocio obligatorias
+            if (!nombre || !email) {
+                alert("⚠️ El nombre y el email son obligatorios.");
+                return;
+            }
 
-        // Validación de coincidencia de password si el usuario escribió algo
-        if (password && password !== confirm) {
-            alert("Las contraseñas no coinciden");
-            return;
-        }
+            // Validación de coincidencia de contraseñas
+            if (pass && pass !== confirmPass) {
+                alert("⚠️ Las contraseñas no coinciden.");
+                return;
+            }
 
-        // Construcción dinámica de la Mutation
-        // Solo incluimos el campo password si no está vacío
-        const mutation = `
-            mutation {
-                actualizarUsuario(
-                    id: "${userId}", 
-                    nombre: "${nombre}", 
-                    email: "${email}"
-                    ${password ? `, password: "${password}"` : ""}
-                ) {
-                    id
-                    nombre
-                    email
+            const mutation = {
+                query: `mutation($id: ID!, $nombre: String, $email: String, $password: String) {
+                    actualizarUsuario(id: $id, nombre: $nombre, email: $email, password: $password) {
+                        id
+                        nombre
+                        email
+                    }
+                }`,
+                variables: { 
+                    id: userId, 
+                    nombre: nombre, 
+                    email: email, 
+                    password: pass || undefined 
                 }
+            };
+
+            try {
+                const res = await fetch('http://localhost:4000/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(mutation)
+                });
+                
+                const result = await res.json();
+                
+                if (result.errors) {
+                    alert("Error: " + result.errors[0].message);
+                    return;
+                }
+
+                if (result.data && result.data.actualizarUsuario) {
+                    // ACTUALIZACIÓN CRÍTICA: Sincronizar localStorage con los nuevos datos
+                    localStorage.setItem('userName', result.data.actualizarUsuario.nombre);
+                    localStorage.setItem('userEmail', result.data.actualizarUsuario.email);
+                    
+                    alert("✅ Perfil actualizado correctamente");
+                    location.reload(); // Recarga para refrescar todos los elementos del Header
+                }
+            } catch (err) { 
+                console.error("Error al actualizar perfil:", err);
+                alert("No se pudo conectar con el servidor.");
             }
-        `;
-
-        try {
-            const response = await fetch('http://localhost:4000/graphql', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: mutation })
-            });
-
-            const { data, errors } = await response.json();
-
-            if (errors) {
-                alert('Error al guardar: ' + errors[0].message);
-            } else if (data.actualizarUsuario) {
-                alert('¡Perfil actualizado con éxito!');
-                // Actualizamos el localStorage por si cambió el nombre
-                localStorage.setItem('userName', data.actualizarUsuario.nombre);
-                location.reload(); // Volver al modo lectura
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Error crítico de conexión');
-        }
-    });
+        });
+    }
 });
 
-async function cargarDatosServidor(id) {
-    const query = `
-        query {
-            obtenerUsuarioPorId(id: "${id}") {
-                nombre
-                email
-            }
-        }
-    `;
-
+/**
+ * Consulta los datos actuales del usuario para rellenar el formulario
+ */
+async function cargarDatosPerfil(id) {
+    const query = {
+        query: `query($id: ID!) { 
+            obtenerUsuarioPorId(id: $id) { 
+                nombre 
+                email 
+            } 
+        }`,
+        variables: { id }
+    };
+    
     try {
-        const response = await fetch('http://localhost:4000/graphql', {
+        const res = await fetch('http://localhost:4000/graphql', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query })
+            body: JSON.stringify(query)
         });
-
-        const { data } = await response.json();
-
+        
+        const { data } = await res.json();
+        
         if (data && data.obtenerUsuarioPorId) {
-            const user = data.obtenerUsuarioPorId;
-            document.getElementById('edit-nombre').value = user.nombre;
-            document.getElementById('edit-email').value = user.email;
-            document.getElementById('perfil-nombre-titulo').textContent = user.nombre;
+            const inputNombre = document.getElementById('edit-nombre');
+            const inputEmail = document.getElementById('edit-email');
+            const tituloNombre = document.getElementById('perfil-nombre-titulo');
+
+            if (inputNombre) inputNombre.value = data.obtenerUsuarioPorId.nombre;
+            if (inputEmail) inputEmail.value = data.obtenerUsuarioPorId.email;
+            if (tituloNombre) tituloNombre.textContent = data.obtenerUsuarioPorId.nombre;
         }
-    } catch (err) {
-        console.error("No se pudieron cargar los datos del servidor", err);
+    } catch (err) { 
+        console.error("Error cargando datos de perfil:", err);
     }
 }

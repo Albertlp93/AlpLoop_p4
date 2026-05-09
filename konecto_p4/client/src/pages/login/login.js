@@ -1,41 +1,52 @@
+/**
+ * @file login.js
+ * @description Gestión de acceso y creación de sesión en localStorage.
+ */
+
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    // IMPORTANTE: Pedimos el ID para poder consultar el perfil luego
-    const query = `
-        query {
-            loginUsuario(email: "${email}", password: "${password}") {
-                id
-                nombre
-                role
+    const query = {
+        query: `
+            query ($email: String!, $password: String!) {
+                loginUsuario(email: $email, password: $password) {
+                    id
+                    nombre
+                    email
+                    role
+                }
             }
-        }
-    `;
+        `,
+        variables: { email, password }
+    };
 
     try {
         const response = await fetch('http://localhost:4000/graphql', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query })
+            body: JSON.stringify(query)
         });
-        
+
         const { data, errors } = await response.json();
 
         if (errors) {
-            alert('Error: ' + errors[0].message);
+            alert("Error: " + errors[0].message);
         } else if (data.loginUsuario) {
-            // Guardamos la sesión con el ID único del usuario
-            localStorage.setItem('userId', data.loginUsuario.id);
-            localStorage.setItem('userName', data.loginUsuario.nombre);
-            localStorage.setItem('userRole', data.loginUsuario.role);
+            const user = data.loginUsuario;
             
-            alert('¡Bienvenido, ' + data.loginUsuario.nombre + '!');
+            // --- PERSISTENCIA DE SESIÓN ---
+            localStorage.setItem('userId', user.id);
+            localStorage.setItem('userName', user.nombre);
+            localStorage.setItem('userEmail', user.email); // Clave principal
+            localStorage.setItem('userRole', user.role);
+
             window.location.href = '../dashboard/dashboard.html';
         }
     } catch (err) {
-        console.error("Error en login:", err);
-        alert('No se pudo conectar con el servidor');
+        console.error("Error de conexión:", err);
+        alert("No se pudo conectar con el servidor.");
     }
 });
