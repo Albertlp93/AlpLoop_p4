@@ -31,6 +31,15 @@ const resolvers = {
       }
     },
 
+    // NUEVA QUERY: Obtener todos los usuarios para el panel ADMIN
+    obtenerUsuarios: async () => {
+      try {
+        return await Usuario.find();
+      } catch (error) {
+        throw new ApolloError("Error al obtener usuarios");
+      }
+    },
+
     obtenerUsuarioPorId: async (_, { id }) => {
       try {
         const usuario = await Usuario.findById(id);
@@ -56,10 +65,17 @@ const resolvers = {
       }
     },
 
+    // ACTUALIZACIÓN MEJORADA: Soporta cambio de ROL y encriptación de nueva PASSWORD
     actualizarUsuario: async (_, { id, ...datosActualizados }) => {
       try {
         const usuario = await Usuario.findById(id);
         if (!usuario) throw new ApolloError("Usuario no encontrado");
+
+        // Si se está enviando una nueva contraseña, hay que encriptarla
+        if (datosActualizados.password) {
+          const salt = await bcrypt.genSalt(10);
+          datosActualizados.password = await bcrypt.hash(datosActualizados.password, salt);
+        }
 
         Object.assign(usuario, datosActualizados);
         return await usuario.save();
@@ -79,14 +95,12 @@ const resolvers = {
       }
     },
 
-    // --- NUEVAS MUTACIONES CORREGIDAS PARA MONGOOSE ---
-
     actualizarVoluntariado: async (_, { id, ...datos }) => {
       try {
         const voluntariado = await Voluntariado.findByIdAndUpdate(
           id, 
           { $set: datos }, 
-          { new: true } // Para que devuelva el objeto ya actualizado
+          { new: true }
         );
         if (!voluntariado) throw new ApolloError("Publicación no encontrada");
         return voluntariado;
@@ -98,7 +112,7 @@ const resolvers = {
     eliminarVoluntariado: async (_, { id }) => {
       try {
         const resultado = await Voluntariado.findByIdAndDelete(id);
-        return !!resultado; // Devuelve true si lo encontró y borró, false si no
+        return !!resultado;
       } catch (error) {
         throw new ApolloError("Error al eliminar: " + error.message);
       }

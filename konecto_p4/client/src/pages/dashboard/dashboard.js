@@ -8,11 +8,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const userName = localStorage.getItem('userName');
     const userRole = localStorage.getItem('userRole');
     const userEmail = localStorage.getItem('userEmail');
-
+    
     if (!userId || !userEmail) {
         localStorage.clear();
         window.location.href = '../login/login.html';
         return;
+    }
+
+    // --- LÓGICA DE INTERFAZ POR ROL (NUEVO) ---
+    // Si el usuario es ADMIN, inyectamos la pestaña de Usuarios en la Navbar
+    if (userRole === 'ADMIN') {
+        const navMenu = document.getElementById('nav-menu');
+        if (navMenu) {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="../usuarios/usuarios.html">Usuarios</a>`;
+            navMenu.appendChild(li);
+        }
     }
 
     document.getElementById('user-display').textContent = userName;

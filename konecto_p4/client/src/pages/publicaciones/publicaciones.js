@@ -1,6 +1,6 @@
 /**
  * @file publicaciones.js
- * @description Gestión de CRUD, Gráficos dinámicos y Sockets.
+ * @description Gestión de CRUD, Gráficos dinámicos, Sockets e Interfaz por Rol.
  */
 
 const socket = io("http://localhost:4000");
@@ -14,6 +14,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const userEmail = localStorage.getItem('userEmail');
 
     if (!userId) { window.location.href = '../login/login.html'; return; }
+
+    // --- LÓGICA DE INTERFAZ POR ROL (NUEVO) ---
+    // Si el usuario es ADMIN, inyectamos la pestaña de Usuarios en la Navbar
+    if (userRole === 'ADMIN') {
+        const navMenu = document.getElementById('nav-menu');
+        if (navMenu) {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="../usuarios/usuarios.html">Usuarios</a>`;
+            navMenu.appendChild(li);
+        }
+    }
 
     document.getElementById('user-display').textContent = userName;
     document.getElementById('role-badge').textContent = userRole;
@@ -102,6 +113,7 @@ async function cargarPublicaciones(userEmail, userRole) {
         });
         const { data } = await res.json();
         const body = document.getElementById('tablaPublicacionesBody');
+        if (!body) return;
         body.innerHTML = '';
 
         if (data && data.obtenerVoluntariados) {
@@ -112,7 +124,9 @@ async function cargarPublicaciones(userEmail, userRole) {
             const ofertas = filtrados.filter(p => p.tipo === 'OFERTA').length;
             const demandas = filtrados.filter(p => p.tipo === 'DEMANDA').length;
             actualizarGrafico(ofertas, demandas);
-            document.getElementById('total-count').textContent = filtrados.length;
+            
+            const totalCountEl = document.getElementById('total-count');
+            if (totalCountEl) totalCountEl.textContent = filtrados.length;
 
             filtrados.forEach(pub => {
                 const tr = document.createElement('tr');
@@ -154,19 +168,22 @@ window.abrirModalEditar = (pub) => {
     document.getElementById('edit-jornada').value = pub.jornada;
     document.getElementById('edit-sueldo').value = pub.sueldo || 0;
 
-    // Lógica dinámica sueldo en modal
     const grupoSueldoModal = document.getElementById('grupoSueldoModal');
-    if (pub.tipo === 'DEMANDA') {
-        grupoSueldoModal.classList.add('d-none');
-    } else {
-        grupoSueldoModal.classList.remove('d-none');
+    if (grupoSueldoModal) {
+        if (pub.tipo === 'DEMANDA') {
+            grupoSueldoModal.classList.add('d-none');
+        } else {
+            grupoSueldoModal.classList.remove('d-none');
+        }
     }
 
     new bootstrap.Modal(document.getElementById('modalEditar')).show();
 };
 
 function actualizarGrafico(o, d) {
-    const ctx = document.getElementById('graficoPublicaciones').getContext('2d');
+    const canvas = document.getElementById('graficoPublicaciones');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     if (miGrafico) miGrafico.destroy();
     
     miGrafico = new Chart(ctx, {

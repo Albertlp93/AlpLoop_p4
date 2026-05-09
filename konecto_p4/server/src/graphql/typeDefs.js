@@ -26,11 +26,14 @@ const typeDefs = gql`
   }
 
   type Query {
-    "Login que retorna el perfil completo (Se define como Query para el frontend)"
+    "Login que retorna el perfil completo"
     loginUsuario(email: String!, password: String!): Usuario
     
     "Lista todos los voluntariados registrados"
     obtenerVoluntariados: [Voluntariado]
+    
+    "Lista todos los usuarios (Solo para ADMIN)"
+    obtenerUsuarios: [Usuario]
     
     "Consulta de perfil: datos de un usuario específico por su ID"
     obtenerUsuarioPorId(id: ID!): Usuario
@@ -45,12 +48,13 @@ const typeDefs = gql`
       role: String
     ): Usuario
 
-    "Actualiza los datos del perfil (nombre, email y/o password)"
+    "Actualiza los datos del perfil (nombre, email, password y role)"
     actualizarUsuario(
       id: ID!, 
       nombre: String, 
       email: String, 
-      password: String
+      password: String,
+      role: String
     ): Usuario
 
     "Crea un voluntariado"
@@ -63,7 +67,7 @@ const typeDefs = gql`
         sueldo: Float
       ): Voluntariado
 
-    "Limpia la base de datos (Utilidades de prueba)"
+    "Limpia la base de datos"
     eliminarTodosVoluntariados: String
     eliminarTodosUsuarios: String
     actualizarVoluntariado(id: ID!, titulo: String, descripcion: String, jornada: String, sueldo: Float): Voluntariado

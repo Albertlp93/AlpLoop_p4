@@ -1,6 +1,6 @@
 /**
  * @file perfil.js
- * @description Gestión del perfil de usuario, validaciones y sincronización de sesión.
+ * @description Gestión del perfil de usuario, validaciones y sincronización de sesión con control de acceso ADMIN.
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -17,8 +17,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    // --- LÓGICA DE INTERFAZ POR ROL (NUEVO) ---
+    // Si el usuario es ADMIN, inyectamos la pestaña de Usuarios en la Navbar
+    if (userRole === 'ADMIN') {
+        const navMenu = document.getElementById('nav-menu');
+        if (navMenu) {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="../usuarios/usuarios.html">Usuarios</a>`;
+            navMenu.appendChild(li);
+        }
+    }
+
     // 3. Sincronizar Header (Navbar) y Elementos de la Tarjeta
-    // Aseguramos que los IDs coincidan con el estilo unificado de la Navbar
     const userDisplay = document.getElementById('user-display');
     const roleBadge = document.getElementById('role-badge');
     
