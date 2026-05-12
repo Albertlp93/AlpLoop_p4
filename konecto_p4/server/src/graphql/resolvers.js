@@ -31,7 +31,6 @@ const resolvers = {
       }
     },
 
-    // NUEVA QUERY: Obtener todos los usuarios para el panel ADMIN
     obtenerUsuarios: async () => {
       try {
         return await Usuario.find();
@@ -65,13 +64,11 @@ const resolvers = {
       }
     },
 
-    // ACTUALIZACIÓN MEJORADA: Soporta cambio de ROL y encriptación de nueva PASSWORD
     actualizarUsuario: async (_, { id, ...datosActualizados }) => {
       try {
         const usuario = await Usuario.findById(id);
         if (!usuario) throw new ApolloError("Usuario no encontrado");
 
-        // Si se está enviando una nueva contraseña, hay que encriptarla
         if (datosActualizados.password) {
           const salt = await bcrypt.genSalt(10);
           datosActualizados.password = await bcrypt.hash(datosActualizados.password, salt);
@@ -81,6 +78,16 @@ const resolvers = {
         return await usuario.save();
       } catch (error) {
         throw new ApolloError("Error al actualizar: " + error.message);
+      }
+    },
+
+    // --- NUEVA MUTATION: ELIMINAR UN USUARIO ---
+    eliminarUsuario: async (_, { id }) => {
+      try {
+        const resultado = await Usuario.findByIdAndDelete(id);
+        return !!resultado; // Retorna true si se eliminó, false si no existía
+      } catch (error) {
+        throw new ApolloError("Error al eliminar el usuario: " + error.message);
       }
     },
 

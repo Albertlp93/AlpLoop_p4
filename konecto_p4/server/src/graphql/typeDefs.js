@@ -26,21 +26,13 @@ const typeDefs = gql`
   }
 
   type Query {
-    "Login que retorna el perfil completo"
     loginUsuario(email: String!, password: String!): Usuario
-    
-    "Lista todos los voluntariados registrados"
     obtenerVoluntariados: [Voluntariado]
-    
-    "Lista todos los usuarios (Solo para ADMIN)"
     obtenerUsuarios: [Usuario]
-    
-    "Consulta de perfil: datos de un usuario específico por su ID"
     obtenerUsuarioPorId(id: ID!): Usuario
   }
 
   type Mutation {
-    "Registro de usuario"
     registrarUsuario(
       nombre: String!, 
       email: String!, 
@@ -48,7 +40,6 @@ const typeDefs = gql`
       role: String
     ): Usuario
 
-    "Actualiza los datos del perfil (nombre, email, password y role)"
     actualizarUsuario(
       id: ID!, 
       nombre: String, 
@@ -57,7 +48,10 @@ const typeDefs = gql`
       role: String
     ): Usuario
 
-    "Crea un voluntariado"
+    # --- NUEVA MUTATION: DEFINICIÓN ---
+    "Elimina un usuario específico por su ID"
+    eliminarUsuario(id: ID!): Boolean
+
     crearVoluntariado(
         titulo: String!, 
         tipo: String!, 
@@ -67,7 +61,6 @@ const typeDefs = gql`
         sueldo: Float
       ): Voluntariado
 
-    "Limpia la base de datos"
     eliminarTodosVoluntariados: String
     eliminarTodosUsuarios: String
     actualizarVoluntariado(id: ID!, titulo: String, descripcion: String, jornada: String, sueldo: Float): Voluntariado

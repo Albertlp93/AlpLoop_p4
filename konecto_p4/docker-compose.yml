@@ -1,6 +1,15 @@
 version: '3.8'
 
 services:
+  # El "ordenador" de la base de datos
+  mongodb:
+    image: mongo:latest
+    container_name: konecto_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
   backend:
     build: ./server
     container_name: konecto_backend
@@ -8,6 +17,8 @@ services:
       - "4000:4000"
     env_file:
       - ./server/.env
+    depends_on:
+      - mongodb  # Espera a que la DB arranque
     volumes:
       - ./server:/app
       - /app/node_modules
@@ -18,4 +29,7 @@ services:
     ports:
       - "3000:80"  
     volumes:
-      - ./client/src:/usr/share/nginx/html 
+      - ./client/src:/usr/share/nginx/html
+
+volumes:
+  mongo_data: # Para que no pierdas tus datos al apagar Docker
